@@ -46,6 +46,7 @@ jobs:
         run: |
           rattler-build build --recipe-dir . \
             --skip-existing=all --target-platform=${{ matrix.target }} \
+            -m variants.yaml \
             -c conda-forge -c https://prefix.dev/pg-forge
 
       - name: Upload all packages
