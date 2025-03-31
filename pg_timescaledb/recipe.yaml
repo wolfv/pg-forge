@@ -1,0 +1,83 @@
+context:
+  version: "2.19.0"
+
+package:
+  name: pg_timescaledb
+  version: ${{ version }}
+
+source:
+  url: https://github.com/timescale/timescaledb/archive/refs/tags/${{ version }}.tar.gz
+  sha256: 783bfcb6513523827127304d3e51c27e95644f59446bef80d4a96d5de58ae5ee
+
+build:
+  script: |
+    mkdir build
+    cd build
+    cmake .. \
+      -G Ninja \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX=$PREFIX \
+      -DCMAKE_PREFIX_PATH=$PREFIX \
+      -DAPACHE_ONLY=ON \
+      -DSEND_TELEMETRY_DEFAULT=OFF \
+      -DUSE_TELEMETRY=OFF \
+
+    cmake --build . --config Release --target install
+
+requirements:
+  build:
+    - cmake
+    - ninja
+    - ${{ compiler('c') }}
+  host:
+    - libpq
+    - openssl
+    - postgresql
+
+tests:
+  - script: |
+      # Test script for TimescaleDB
+      export TEST_DIR=./test_timescaledb
+
+      # Initialize a new PostgreSQL database cluster
+      initdb -D $TEST_DIR
+
+      # Configure PostgreSQL to load TimescaleDB
+      echo "shared_preload_libraries = 'timescaledb'" >> $TEST_DIR/postgresql.conf
+
+      # Start PostgreSQL server
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+
+      # Create and test the TimescaleDB extension
+      psql -c "CREATE EXTENSION \"timescaledb\";" postgres
+      psql -c "SELECT extname, extversion FROM pg_extension WHERE extname = 'timescaledb';" postgres
+
+      # Create a test hypertable and insert data
+      psql postgres <<EOF
+      CREATE TABLE metrics (
+        time TIMESTAMPTZ NOT NULL,
+        value DOUBLE PRECISION,
+        device_id INTEGER
+      );
+      SELECT create_hypertable('metrics', 'time');
+      INSERT INTO metrics VALUES 
+        (NOW(), 23.4, 1),
+        (NOW() - INTERVAL '1 hour', 22.1, 1);
+      SELECT * FROM metrics ORDER BY time DESC;
+      EOF
+
+      # Stop PostgreSQL server
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+
+about:
+  homepage: https://www.timescale.com/
+  license: Apache-2.0
+  summary: TimescaleDB is an open-source time-series database optimized for fast ingest and complex queries.
+  description: |
+    TimescaleDB is an open-source time-series database optimized for fast ingest and complex queries.
+  repository: https://github.com/timescale/timescaledb
