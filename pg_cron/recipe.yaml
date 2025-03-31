@@ -1,0 +1,46 @@
+context:
+  version: "1.6.5"
+
+package:
+  name: pg_cron
+  version: ${{ version }}
+
+source:
+  url: https://github.com/citusdata/pg_cron/archive/refs/tags/v${{ version }}.tar.gz
+  sha256: 0118080f995fec67e25e58d44c66953e7b2bf5a47bb0602fd2ad147ea646d808
+
+build:
+  script: |
+    make install libpq=$PREFIX/lib/libpq${SHLIB_EXT} \
+                 pkglibdir=$PREFIX/lib \
+                 datadir=$PREFIX/share \
+                 -j${CPU_COUNT}
+  
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+  host:
+    - postgresql
+    - libpq
+
+tests:
+  - script: |
+      export TEST_DIR=./test_pg_cron
+      initdb -D $TEST_DIR
+      echo "shared_preload_libraries = 'pg_cron'" >> $TEST_DIR/postgresql.conf
+      pg_ctl -D ./test_pg_cron -l logfile start || cat ./logfile
+      psql -c "CREATE EXTENSION \"pg_cron\";" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://github.com/citusdata/pg_cron
+  license: PostgreSQL
+  summary: Run periodic jobs in PostgreSQL
+  description: |
+    pg_cron is a simple cron-based job scheduler for PostgreSQL that runs inside the database as an extension.
+  repository: https://github.com/citusdata/pg_cron
