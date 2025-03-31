@@ -10,6 +10,7 @@ source:
   sha256: 783bfcb6513523827127304d3e51c27e95644f59446bef80d4a96d5de58ae5ee
 
 build:
+  skip: true
   script: |
     mkdir build
     cd build
