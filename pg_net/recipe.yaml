@@ -1,0 +1,47 @@
+context:
+  version: "0.14.0"
+
+package:
+  name: pg_net
+  version: ${{ version }}
+
+source:
+  url: https://github.com/supabase/pg_net/archive/refs/tags/v${{ version }}.tar.gz
+  sha256: 04cf8a7070c7fa47ffc175bfc75542be1172f859c499aeeb259c379c584ff1f9
+
+build:
+  script: |
+    make install libpq=$PREFIX/lib/libpq${SHLIB_EXT} \
+                 pkglibdir=$PREFIX/lib \
+                 datadir=$PREFIX/share \
+                 -j${CPU_COUNT}
+  
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+  host:
+    - postgresql
+    - libpq
+    - libcurl
+
+tests:
+  - script: |
+      export TEST_DIR=./test_pg_net
+      initdb -D $TEST_DIR
+      echo "shared_preload_libraries = 'pg_net'" >> $TEST_DIR/postgresql.conf
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+      psql -c "CREATE EXTENSION \"pg_net\";" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://github.com/citusdata/pg_cron
+  license: PostgreSQL
+  summary: Run periodic jobs in PostgreSQL
+  description: |
+    pg_cron is a simple cron-based job scheduler for PostgreSQL that runs inside the database as an extension.
+  repository: https://github.com/citusdata/pg_cron
