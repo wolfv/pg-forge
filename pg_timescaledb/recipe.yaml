@@ -11,6 +11,7 @@ source:
 
 build:
   skip: true
+  number: 1
   script: |
     mkdir build
     cd build
@@ -19,7 +20,7 @@ build:
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX=$PREFIX \
       -DCMAKE_PREFIX_PATH=$PREFIX \
-      -DAPACHE_ONLY=ON \
+      -DAPACHE_ONLY=OFF \
       -DSEND_TELEMETRY_DEFAULT=OFF \
       -DUSE_TELEMETRY=OFF \
 
@@ -77,7 +78,9 @@ tests:
 
 about:
   homepage: https://www.timescale.com/
-  license: Apache-2.0
+  license: LicenseRef-Timescale
+  license_file:
+    - tsl/LICENSE-TIMESCALE
   summary: TimescaleDB is an open-source time-series database optimized for fast ingest and complex queries.
   description: |
     TimescaleDB is an open-source time-series database optimized for fast ingest and complex queries.
