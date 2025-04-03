@@ -86,9 +86,3 @@ about:
   license: LGPL-3.0-or-later
   documentation: https://www.psycopg.org/psycopg3/docs/
   repository: https://github.com/psycopg/psycopg/
-
-extra:
-  recipe-maintainers:
-    - msarahan
-    - ocefpaf
-    - xylar

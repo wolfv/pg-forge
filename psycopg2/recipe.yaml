@@ -1,0 +1,53 @@
+context:
+  name: psycopg2
+  version: 2.9.9
+
+recipe:
+  name: ${{ name|lower }}-split
+  version: ${{ version }}
+
+source:
+  url: https://pypi.io/packages/source/p/psycopg2/psycopg2-${{ version }}.tar.gz
+  sha256: d1454bde93fb1e224166811694d600e746430c006fbb031ea06ecc2ea41bf156
+  patches:
+    - 0001-have-openssl.patch
+    # - 0002-python-3.13.patch
+
+build:
+  number: 2
+
+outputs:
+  - package:
+      name: ${{ name }}
+
+    build:
+      script: install_psycopg2
+
+    requirements:
+      build:
+        - ${{ compiler('c') }}
+        # - ${{ stdlib("c") }}
+      host:
+        - python
+        - setuptools
+        - pip
+        - ${{ "openssl" if not linux }}
+        - libpq
+
+    tests:
+      - python:
+          imports:
+            - psycopg2
+            - psycopg2._psycopg
+
+about:
+  homepage: http://initd.org/psycopg/
+  license: LGPL-3.0-or-later
+  license_file: LICENSE
+  summary: PostgreSQL database adapter for Python
+  description: |
+    Psycopg is the most popular PostgreSQL adapter for the Python programming
+    language. Its main features are the complete implementation of the Python DB
+    API 2.0 specification and the thread safety.
+  documentation: http://initd.org/psycopg/docs/
+  repository: https://github.com/psycopg/psycopg2/
