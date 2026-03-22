@@ -1,7 +1,8 @@
 zip_keys:
   - [postgresql, libpq]
 
-python_min: 3.12
+python_min:
+  - "3.12"
 
 postgresql:
   - 14
@@ -16,4 +17,4 @@ libpq:
   - 17
 
 python:
-  - 3.12
+  - "3.12"
