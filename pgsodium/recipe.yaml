@@ -19,6 +19,7 @@ requirements:
   build:
     - make
     - ${{ compiler('c') }}
+    - lld
   host:
     - postgresql
     - libpq
@@ -28,7 +29,14 @@ tests:
   - script: |
       export TEST_DIR=./test_pgsodium
       initdb -D $TEST_DIR
+      # Create a dummy getkey script that pgsodium requires on startup
+      cat > $PREFIX/share/extension/pgsodium_getkey <<'GETKEY'
+      #!/bin/bash
+      echo "0000000000000000000000000000000000000000000000000000000000000000"
+      GETKEY
+      chmod +x $PREFIX/share/extension/pgsodium_getkey
       echo "shared_preload_libraries = 'pgsodium'" >> $TEST_DIR/postgresql.conf
+      echo "pgsodium.getkey_script = '$PREFIX/share/extension/pgsodium_getkey'" >> $TEST_DIR/postgresql.conf
       pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
       psql -c "CREATE EXTENSION \"pgsodium\";" postgres
       pg_ctl stop -D $TEST_DIR

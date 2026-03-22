@@ -21,6 +21,7 @@ requirements:
     - make
     - perl
     - ${{ compiler('c') }}
+    - lld
   host:
     - perl
     - postgresql

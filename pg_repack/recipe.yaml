@@ -21,6 +21,7 @@ requirements:
     - make
     - gawk
     - ${{ compiler('c') }}
+    - lld
   host:
     - postgresql
     - libpq

@@ -30,6 +30,7 @@ requirements:
     - cmake
     - ninja
     - ${{ compiler('c') }}
+    - lld
   host:
     - libpq
     - openssl
