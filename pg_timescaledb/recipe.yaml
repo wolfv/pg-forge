@@ -1,5 +1,5 @@
 context:
-  version: "2.19.0"
+  version: "2.25.2"
 
 package:
   name: pg_timescaledb
@@ -7,10 +7,10 @@ package:
 
 source:
   url: https://github.com/timescale/timescaledb/archive/refs/tags/${{ version }}.tar.gz
-  sha256: 783bfcb6513523827127304d3e51c27e95644f59446bef80d4a96d5de58ae5ee
+  sha256: 179d281a4977cdb29ad4416affdc00015d217bb79450e073ea7e8e144f9da9b4
 
 build:
-  number: 1
+  number: 0
   script: |
     mkdir build
     cd build
