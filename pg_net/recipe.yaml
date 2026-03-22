@@ -20,6 +20,7 @@ requirements:
   build:
     - make
     - ${{ compiler('c') }}
+    - lld
   host:
     - postgresql
     - libpq
@@ -39,9 +40,9 @@ tests:
         - postgresql
 
 about:
-  homepage: https://github.com/citusdata/pg_cron
-  license: PostgreSQL
-  summary: Run periodic jobs in PostgreSQL
+  homepage: https://github.com/supabase/pg_net
+  license: Apache-2.0
+  summary: Async networking for PostgreSQL
   description: |
-    pg_cron is a simple cron-based job scheduler for PostgreSQL that runs inside the database as an extension.
-  repository: https://github.com/citusdata/pg_cron
+    pg_net is a PostgreSQL extension exposing a SQL interface for async networking with a focus on scalability and UX.
+  repository: https://github.com/supabase/pg_net

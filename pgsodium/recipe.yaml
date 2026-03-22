@@ -1,0 +1,57 @@
+context:
+  version: "3.1.9"
+
+package:
+  name: pgsodium
+  version: ${{ version }}
+
+source:
+  url: https://github.com/michelp/pgsodium/archive/refs/tags/v${{ version }}.tar.gz
+  sha256: 44284da99215051ad8304849e48f1840780ef59cb28b9043a97428f9abda1d06
+
+build:
+  script: |
+    make install pkglibdir=$PREFIX/lib \
+                 datadir=$PREFIX/share \
+                 -j${CPU_COUNT}
+
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+    - lld
+  host:
+    - postgresql
+    - libpq
+    - libsodium
+
+tests:
+  - script: |
+      export TEST_DIR=./test_pgsodium
+      initdb -D $TEST_DIR
+      # Create a dummy getkey script that pgsodium requires on startup
+      cat > $PREFIX/share/extension/pgsodium_getkey <<'GETKEY'
+      #!/bin/bash
+      echo "0000000000000000000000000000000000000000000000000000000000000000"
+      GETKEY
+      chmod +x $PREFIX/share/extension/pgsodium_getkey
+      echo "shared_preload_libraries = 'pgsodium'" >> $TEST_DIR/postgresql.conf
+      echo "pgsodium.getkey_script = '$PREFIX/share/extension/pgsodium_getkey'" >> $TEST_DIR/postgresql.conf
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+      psql -c "CREATE EXTENSION \"pgsodium\";" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://github.com/michelp/pgsodium
+  license: BSD-2-Clause
+  summary: PostgreSQL extension for libsodium cryptographic functions
+  description: |
+    pgsodium is a PostgreSQL extension that exposes modern libsodium based
+    cryptographic functions to SQL. It provides encryption, decryption,
+    digital signatures, hashing, key derivation, and other cryptographic
+    operations directly in PostgreSQL.
+  repository: https://github.com/michelp/pgsodium

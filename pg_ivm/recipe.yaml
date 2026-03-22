@@ -1,0 +1,49 @@
+context:
+  version: "1.13"
+
+package:
+  name: pg_ivm
+  version: ${{ version }}
+
+source:
+  url: https://github.com/sraoss/pg_ivm/archive/refs/tags/v${{ version }}.tar.gz
+  sha256: 0868e5f6473d5de70e5314decd221ce4e7d2e1326ee99384fd593a0866bca1ab
+
+build:
+  script: |
+    make install PG_CFLAGS="-Wno-incompatible-pointer-types" \
+                 pkglibdir=$PREFIX/lib \
+                 datadir=$PREFIX/share \
+                 -j${CPU_COUNT}
+
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+    - lld
+  host:
+    - postgresql
+    - libpq
+
+tests:
+  - script: |
+      export TEST_DIR=./test_pg_ivm
+      initdb -D $TEST_DIR
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+      psql -c "CREATE EXTENSION \"pg_ivm\";" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://github.com/sraoss/pg_ivm
+  license: PostgreSQL
+  summary: Incremental View Maintenance for PostgreSQL
+  description: |
+    pg_ivm provides Incremental View Maintenance (IVM) for PostgreSQL.
+    IVM is a technique to maintain materialized views which computes and
+    applies only the incremental changes to the materialized views rather
+    than recomputing the full contents as REFRESH MATERIALIZED VIEW does.
+  repository: https://github.com/sraoss/pg_ivm

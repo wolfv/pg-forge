@@ -1,0 +1,49 @@
+context:
+  version: "5.2.4"
+
+package:
+  name: pg_partman
+  version: ${{ version }}
+
+source:
+  url: https://github.com/pgpartman/pg_partman/archive/refs/tags/v${{ version }}.tar.gz
+  sha256: 462464d83389ef20256b982960646a1572341c0beb09eeff32b4a69f04e31b76
+
+build:
+  script: |
+    make install pkglibdir=$PREFIX/lib \
+                 datadir=$PREFIX/share \
+                 -j${CPU_COUNT}
+
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+    - lld
+  host:
+    - postgresql
+    - libpq
+
+tests:
+  - script: |
+      export TEST_DIR=./test_pg_partman
+      initdb -D $TEST_DIR
+      echo "shared_preload_libraries = 'pg_partman_bgw'" >> $TEST_DIR/postgresql.conf
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+      psql -c "CREATE SCHEMA partman;" postgres
+      psql -c "CREATE EXTENSION \"pg_partman\" SCHEMA partman;" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://github.com/pgpartman/pg_partman
+  license: PostgreSQL
+  summary: Partition management extension for PostgreSQL
+  description: |
+    pg_partman is an extension to create and manage both time-based and
+    number-based table partition sets. Native partitioning in PostgreSQL 10+
+    is supported.
+  repository: https://github.com/pgpartman/pg_partman

@@ -1,0 +1,51 @@
+context:
+  version: "4.16.5"
+
+package:
+  name: orafce
+  version: ${{ version }}
+
+source:
+  url: https://github.com/orafce/orafce/archive/refs/tags/VERSION_4_16_5.tar.gz
+  sha256: 734f1daaafcdf5cee325e291f45660faa767241ab30f232121df81514a7a73af
+
+build:
+  script: |
+    make install BISON=$(which bison) FLEX=$(which flex) \
+                 pkglibdir=$PREFIX/lib \
+                 datadir=$PREFIX/share \
+                 -j${CPU_COUNT}
+
+requirements:
+  build:
+    - make
+    - bison
+    - flex
+    - ${{ compiler('c') }}
+    - lld
+  host:
+    - postgresql
+    - libpq
+
+tests:
+  - script: |
+      export TEST_DIR=./test_orafce
+      initdb -D $TEST_DIR
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+      psql -c "CREATE EXTENSION \"orafce\";" postgres
+      psql -c "SELECT oracle.add_months(date '2005-05-31', 1);" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://github.com/orafce/orafce
+  license: BSD-3-Clause
+  summary: Oracle compatibility functions for PostgreSQL
+  description: |
+    Orafce provides implementations of functions and packages from the Oracle
+    RDBMS that are missing in PostgreSQL. This makes migration from Oracle
+    to PostgreSQL easier.
+  repository: https://github.com/orafce/orafce
