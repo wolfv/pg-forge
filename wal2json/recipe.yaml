@@ -26,7 +26,7 @@ requirements:
 
 tests:
   - script: |
-      test -f $PREFIX/lib/wal2json.so
+      test -f $PREFIX/lib/wal2json.so || test -f $PREFIX/lib/wal2json.dylib
 
     requirements:
       run:
