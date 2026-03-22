@@ -1,5 +1,5 @@
 context:
-  version: "1.5.2"
+  version: "1.5.3"
 
 package:
   name: pg_repack
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/reorg/pg_repack/archive/refs/tags/ver_${{ version }}.tar.gz
-  sha256: 4516cad42251ed3ad53ff619733004db47d5755acac83f75924cd94d1c4fb681
+  sha256: 9439892c0b7c7575677f61133e5692f3e8cfd5c6688c5db4fb202320c668c745
 
 build:
   script: |
@@ -19,6 +19,7 @@ build:
 requirements:
   build:
     - make
+    - gawk
     - ${{ compiler('c') }}
   host:
     - postgresql

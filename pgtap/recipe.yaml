@@ -11,15 +11,18 @@ source:
 
 build:
   script: |
-    make install pkglibdir=$PREFIX/lib \
+    make install PERL=$(which perl) \
+                 pkglibdir=$PREFIX/lib \
                  datadir=$PREFIX/share \
                  -j${CPU_COUNT}
 
 requirements:
   build:
     - make
+    - perl
     - ${{ compiler('c') }}
   host:
+    - perl
     - postgresql
     - libpq
 

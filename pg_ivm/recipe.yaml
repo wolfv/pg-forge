@@ -1,5 +1,5 @@
 context:
-  version: "1.9"
+  version: "1.13"
 
 package:
   name: pg_ivm
@@ -7,11 +7,12 @@ package:
 
 source:
   url: https://github.com/sraoss/pg_ivm/archive/refs/tags/v${{ version }}.tar.gz
-  sha256: 59e15722939f274650abf637f315dd723c87073496ca77236b044cb205270d8b
+  sha256: 0868e5f6473d5de70e5314decd221ce4e7d2e1326ee99384fd593a0866bca1ab
 
 build:
   script: |
-    make install pkglibdir=$PREFIX/lib \
+    make install PG_CFLAGS="-Wno-incompatible-pointer-types" \
+                 pkglibdir=$PREFIX/lib \
                  datadir=$PREFIX/share \
                  -j${CPU_COUNT}
 

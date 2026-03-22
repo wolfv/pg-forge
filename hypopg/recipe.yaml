@@ -1,5 +1,5 @@
 context:
-  version: "1.4.1"
+  version: "1.4.2"
 
 package:
   name: hypopg
@@ -7,11 +7,12 @@ package:
 
 source:
   url: https://github.com/HypoPG/hypopg/archive/refs/tags/${{ version }}.tar.gz
-  sha256: 9afe6357fd389d8d33fad81703038ce520b09275ec00153c6c89282bcdedd6bc
+  sha256: 30596ca3d71b33af53326cdf27ed9fc794dc6db33864c531fde1e48c1bf7de7d
 
 build:
   script: |
-    make install pkglibdir=$PREFIX/lib \
+    make install PG_CFLAGS="-Wno-incompatible-pointer-types" \
+                 pkglibdir=$PREFIX/lib \
                  datadir=$PREFIX/share \
                  -j${CPU_COUNT}
 

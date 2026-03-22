@@ -1,23 +1,26 @@
 context:
-  version: "4.14.1"
+  version: "4.16.5"
 
 package:
   name: orafce
   version: ${{ version }}
 
 source:
-  url: https://github.com/orafce/orafce/archive/refs/tags/VERSION_4_14_1.tar.gz
-  sha256: 94431961f4b33bed0782761570d83028fdb0136fdfde0eb23ebadb25e4515bda
+  url: https://github.com/orafce/orafce/archive/refs/tags/VERSION_4_16_5.tar.gz
+  sha256: 734f1daaafcdf5cee325e291f45660faa767241ab30f232121df81514a7a73af
 
 build:
   script: |
-    make install pkglibdir=$PREFIX/lib \
+    make install BISON=$(which bison) FLEX=$(which flex) \
+                 pkglibdir=$PREFIX/lib \
                  datadir=$PREFIX/share \
                  -j${CPU_COUNT}
 
 requirements:
   build:
     - make
+    - bison
+    - flex
     - ${{ compiler('c') }}
   host:
     - postgresql

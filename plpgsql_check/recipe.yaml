@@ -1,5 +1,5 @@
 context:
-  version: "2.7.11"
+  version: "2.8.11"
 
 package:
   name: plpgsql_check
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/okbob/plpgsql_check/archive/refs/tags/v${{ version }}.tar.gz
-  sha256: 208933f8dbe8e0d2628eb3851e9f52e6892b8e280c63700c0f1ce7883625d172
+  sha256: de01ebd2e87a064418c453a74dafb43c2d41acbecdfd80c78cb5b6a95b834d27
 
 build:
   script: |

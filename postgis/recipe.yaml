@@ -16,12 +16,25 @@ build:
       --with-pgconfig=$PREFIX/bin/pg_config \
       --with-geosconfig=$PREFIX/bin/geos-config \
       --with-projdir=$PREFIX \
-      --with-gdalconfig=$PREFIX/bin/gdal-config \
-      --with-protobufdir=$PREFIX \
+      --with-xml2config=$PREFIX/bin/xml2-config \
+      --without-protobuf \
       --without-raster \
-      --without-topology
-    make -j${CPU_COUNT}
-    make install
+      --without-topology \
+      --without-gui \
+      --without-phony-revision
+    # Create stub raster SQL files to satisfy build dependencies
+    mkdir -p raster/rt_pg
+    touch raster/rt_pg/rtpostgis.sql.in
+    touch raster/rt_pg/rtpostgis_upgrade_cleanup.sql.in
+    touch raster/rt_pg/rtpostgis_drop.sql.in
+    make -j${CPU_COUNT} PERL=$(which perl) || true
+    make -C libpgcommon -j${CPU_COUNT}
+    make -C postgis -j${CPU_COUNT}
+    make -C postgis install
+    # Build and install the extension SQL files
+    make -C extensions postgis_extension_helper.sql
+    make -C extensions/postgis -j${CPU_COUNT} PERL=$(which perl)
+    make -C extensions/postgis install PERL=$(which perl)
 
 requirements:
   build:
@@ -35,7 +48,9 @@ requirements:
     - proj
     - json-c
     - libxml2
-    - protobuf
+    - xz
+    - icu
+    - libiconv
 
 tests:
   - script: |
