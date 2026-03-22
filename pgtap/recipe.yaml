@@ -21,6 +21,7 @@ requirements:
     - make
     - perl
     - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
     - lld
   host:
     - perl

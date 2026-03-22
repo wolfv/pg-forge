@@ -15,11 +15,12 @@ build:
                  pkglibdir=$PREFIX/lib \
                  datadir=$PREFIX/share \
                  -j${CPU_COUNT}
-  
+
 requirements:
   build:
     - make
     - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
     - lld
   host:
     - postgresql

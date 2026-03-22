@@ -11,3 +11,12 @@ bump = "bash bump_recipes.sh"
 
 [dependencies]
 rattler-build = ">=0.60.0,<0.61"
+
+[feature.lint.dependencies]
+prettier = "*"
+
+[feature.lint.tasks]
+fmt = "prettier --write '**/*.yaml'"
+
+[environments]
+lint = ["lint"]
