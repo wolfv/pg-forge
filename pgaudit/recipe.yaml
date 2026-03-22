@@ -1,0 +1,50 @@
+context:
+  version: "17.0"
+
+package:
+  name: pgaudit
+  version: ${{ version }}
+
+source:
+  url: https://github.com/pgaudit/pgaudit/archive/refs/tags/${{ version }}.tar.gz
+  sha256: 7d0d08d030275d525f36cd48b38c6455f1023da863385badff0cec44965bfd8c
+
+build:
+  script: |
+    make install USE_PGXS=1 \
+         pkglibdir=$PREFIX/lib \
+         datadir=$PREFIX/share \
+         -j${CPU_COUNT}
+
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+  host:
+    - postgresql
+    - libpq
+    - openssl
+
+tests:
+  - script: |
+      export TEST_DIR=./test_pgaudit
+      initdb -D $TEST_DIR
+      echo "shared_preload_libraries = 'pgaudit'" >> $TEST_DIR/postgresql.conf
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+      psql -c "CREATE EXTENSION \"pgaudit\";" postgres
+      psql -c "SET pgaudit.log = 'all';" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://www.pgaudit.org/
+  license: PostgreSQL
+  summary: Open source audit logging extension for PostgreSQL
+  description: |
+    pgAudit provides detailed session and object audit logging via the standard
+    PostgreSQL logging facility. It extends the standard logging with detailed
+    information about what actions were performed and by whom.
+  repository: https://github.com/pgaudit/pgaudit

@@ -1,0 +1,62 @@
+context:
+  version: "3.5.2"
+
+package:
+  name: postgis
+  version: ${{ version }}
+
+source:
+  url: https://download.osgeo.org/postgis/source/postgis-${{ version }}.tar.gz
+  sha256: fb9f95d56e3aaef6a296473c76a3b99005ac41864d486c197cd478c9b14f791a
+
+build:
+  script: |
+    ./configure \
+      --prefix=$PREFIX \
+      --with-pgconfig=$PREFIX/bin/pg_config \
+      --with-geosconfig=$PREFIX/bin/geos-config \
+      --with-projdir=$PREFIX \
+      --with-gdalconfig=$PREFIX/bin/gdal-config \
+      --with-protobufdir=$PREFIX \
+      --without-raster \
+      --without-topology
+    make -j${CPU_COUNT}
+    make install
+
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+    - ${{ compiler('cxx') }}
+  host:
+    - postgresql
+    - libpq
+    - geos
+    - proj
+    - json-c
+    - libxml2
+    - protobuf
+
+tests:
+  - script: |
+      export TEST_DIR=./test_postgis
+      initdb -D $TEST_DIR
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+      psql -c "CREATE EXTENSION \"postgis\";" postgres
+      psql -c "SELECT PostGIS_Version();" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://postgis.net/
+  license: GPL-2.0-or-later
+  summary: Spatial database extender for PostgreSQL
+  description: |
+    PostGIS is a spatial database extender for PostgreSQL. It adds support
+    for geographic objects allowing location queries to be run in SQL.
+    PostGIS adds types for points, lines, polygons, and more, along with
+    functions for spatial analysis and indexing.
+  repository: https://github.com/postgis/postgis

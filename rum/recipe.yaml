@@ -1,0 +1,48 @@
+context:
+  version: "1.3.14"
+
+package:
+  name: rum
+  version: ${{ version }}
+
+source:
+  url: https://github.com/postgrespro/rum/archive/refs/tags/${{ version }}.tar.gz
+  sha256: ca3412672beaf3dbf705521875ffa9a1ddb3fc6573449f8bd4557c577a3a6015
+
+build:
+  script: |
+    make USE_PGXS=1 install \
+         pkglibdir=$PREFIX/lib \
+         datadir=$PREFIX/share \
+         -j${CPU_COUNT}
+
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+  host:
+    - postgresql
+    - libpq
+
+tests:
+  - script: |
+      export TEST_DIR=./test_rum
+      initdb -D $TEST_DIR
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+      psql -c "CREATE EXTENSION \"rum\";" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://github.com/postgrespro/rum
+  license: PostgreSQL
+  summary: RUM index access method for PostgreSQL
+  description: |
+    RUM is an index access method similar to GIN but with additional
+    capabilities. It stores additional per-entry information, supports
+    ordering of results by distance, and provides fast phrase search
+    and ranking for full-text search.
+  repository: https://github.com/postgrespro/rum

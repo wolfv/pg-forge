@@ -1,0 +1,48 @@
+context:
+  version: "1.7.0"
+
+package:
+  name: pg_squeeze
+  version: ${{ version }}
+
+source:
+  url: https://github.com/citusdata/pg_squeeze/archive/refs/tags/REL1_7_0.tar.gz
+  sha256: 0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5
+
+build:
+  script: |
+    make install pkglibdir=$PREFIX/lib \
+                 datadir=$PREFIX/share \
+                 -j${CPU_COUNT}
+
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+  host:
+    - postgresql
+    - libpq
+
+tests:
+  - script: |
+      export TEST_DIR=./test_pg_squeeze
+      initdb -D $TEST_DIR
+      echo "shared_preload_libraries = 'pg_squeeze'" >> $TEST_DIR/postgresql.conf
+      echo "wal_level = logical" >> $TEST_DIR/postgresql.conf
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+      psql -c "CREATE EXTENSION \"pg_squeeze\";" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://github.com/citusdata/pg_squeeze
+  license: BSD-2-Clause
+  summary: Online table compaction for PostgreSQL
+  description: |
+    pg_squeeze is a PostgreSQL extension that removes unused space from a
+    table and optionally sorts tuples according to a particular index.
+    It works online, without holding exclusive locks during processing.
+  repository: https://github.com/citusdata/pg_squeeze

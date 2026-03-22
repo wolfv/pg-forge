@@ -1,0 +1,50 @@
+context:
+  version: "1.5.2"
+
+package:
+  name: pg_repack
+  version: ${{ version }}
+
+source:
+  url: https://github.com/reorg/pg_repack/archive/refs/tags/ver_${{ version }}.tar.gz
+  sha256: 4516cad42251ed3ad53ff619733004db47d5755acac83f75924cd94d1c4fb681
+
+build:
+  script: |
+    make install pkglibdir=$PREFIX/lib \
+                 datadir=$PREFIX/share \
+                 bindir=$PREFIX/bin \
+                 -j${CPU_COUNT}
+
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+  host:
+    - postgresql
+    - libpq
+    - openssl
+    - zlib
+
+tests:
+  - script: |
+      export TEST_DIR=./test_pg_repack
+      initdb -D $TEST_DIR
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+      psql -c "CREATE EXTENSION \"pg_repack\";" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://reorg.github.io/pg_repack/
+  license: BSD-3-Clause
+  summary: Reorganize tables in PostgreSQL databases with minimal locks
+  description: |
+    pg_repack is a PostgreSQL extension which lets you remove bloat from tables
+    and indexes, and optionally restore the physical order of clustered indexes.
+    Unlike CLUSTER and VACUUM FULL it works online, without holding an exclusive
+    lock on the processed tables during processing.
+  repository: https://github.com/reorg/pg_repack

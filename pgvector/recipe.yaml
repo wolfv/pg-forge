@@ -1,0 +1,49 @@
+context:
+  version: "0.8.0"
+
+package:
+  name: pgvector
+  version: ${{ version }}
+
+source:
+  url: https://github.com/pgvector/pgvector/archive/refs/tags/v${{ version }}.tar.gz
+  sha256: 867a2c328d4928a5a9d6f052cd3bc78c7d60228a9b914ad32aa3db88e9de27b0
+
+build:
+  script: |
+    make install pkglibdir=$PREFIX/lib \
+                 datadir=$PREFIX/share \
+                 -j${CPU_COUNT}
+
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+  host:
+    - postgresql
+    - libpq
+
+tests:
+  - script: |
+      export TEST_DIR=./test_pgvector
+      initdb -D $TEST_DIR
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+      psql -c "CREATE EXTENSION \"vector\";" postgres
+      psql -c "CREATE TABLE items (id bigserial PRIMARY KEY, embedding vector(3));" postgres
+      psql -c "INSERT INTO items (embedding) VALUES ('[1,2,3]'), ('[4,5,6]');" postgres
+      psql -c "SELECT * FROM items ORDER BY embedding <-> '[3,1,2]' LIMIT 5;" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://github.com/pgvector/pgvector
+  license: PostgreSQL
+  summary: Open-source vector similarity search for PostgreSQL
+  description: |
+    pgvector is an open-source extension for vector similarity search in PostgreSQL.
+    It supports exact and approximate nearest neighbor search, L2 distance, inner product,
+    cosine distance, and HNSW and IVFFlat indexing.
+  repository: https://github.com/pgvector/pgvector

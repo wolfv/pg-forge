@@ -1,0 +1,46 @@
+context:
+  version: "2.7.11"
+
+package:
+  name: plpgsql_check
+  version: ${{ version }}
+
+source:
+  url: https://github.com/okbob/plpgsql_check/archive/refs/tags/v${{ version }}.tar.gz
+  sha256: 208933f8dbe8e0d2628eb3851e9f52e6892b8e280c63700c0f1ce7883625d172
+
+build:
+  script: |
+    make install pkglibdir=$PREFIX/lib \
+                 datadir=$PREFIX/share \
+                 -j${CPU_COUNT}
+
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+  host:
+    - postgresql
+    - libpq
+
+tests:
+  - script: |
+      export TEST_DIR=./test_plpgsql_check
+      initdb -D $TEST_DIR
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+      psql -c "CREATE EXTENSION \"plpgsql_check\";" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://github.com/okbob/plpgsql_check
+  license: MIT
+  summary: Linter and checker for PL/pgSQL functions
+  description: |
+    plpgsql_check is a linter tool for the PL/pgSQL language that checks
+    code in PL/pgSQL functions for errors such as undeclared variables,
+    wrong data types, SQL injection vulnerabilities, and other common issues.
+  repository: https://github.com/okbob/plpgsql_check

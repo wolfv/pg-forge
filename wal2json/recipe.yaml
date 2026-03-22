@@ -1,0 +1,43 @@
+context:
+  version: "2.6"
+
+package:
+  name: wal2json
+  version: ${{ version }}
+
+source:
+  url: https://github.com/eulerto/wal2json/archive/refs/tags/wal2json_2_6.tar.gz
+  sha256: 18b4bdec28c74a8fc98a11c72de38378a760327ef8e5e42e975b0029eb96ba0d
+
+build:
+  script: |
+    make install pkglibdir=$PREFIX/lib \
+                 datadir=$PREFIX/share \
+                 -j${CPU_COUNT}
+
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+  host:
+    - postgresql
+    - libpq
+
+tests:
+  - script: |
+      test -f $PREFIX/lib/wal2json${SHLIB_EXT}
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://github.com/eulerto/wal2json
+  license: BSD-3-Clause
+  summary: JSON output plugin for logical decoding in PostgreSQL
+  description: |
+    wal2json is an output plugin for logical decoding. It means that the
+    plugin has access to tuples produced by INSERT and UPDATE. Also, UPDATE/DELETE
+    old row versions can be accessed depending on the configured replica identity.
+    Changes can be consumed using the streaming protocol or by a SQL API.
+  repository: https://github.com/eulerto/wal2json

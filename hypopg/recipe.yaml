@@ -1,0 +1,48 @@
+context:
+  version: "1.4.1"
+
+package:
+  name: hypopg
+  version: ${{ version }}
+
+source:
+  url: https://github.com/HypoPG/hypopg/archive/refs/tags/${{ version }}.tar.gz
+  sha256: 9afe6357fd389d8d33fad81703038ce520b09275ec00153c6c89282bcdedd6bc
+
+build:
+  script: |
+    make install pkglibdir=$PREFIX/lib \
+                 datadir=$PREFIX/share \
+                 -j${CPU_COUNT}
+
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+  host:
+    - postgresql
+    - libpq
+
+tests:
+  - script: |
+      export TEST_DIR=./test_hypopg
+      initdb -D $TEST_DIR
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+      psql -c "CREATE EXTENSION \"hypopg\";" postgres
+      psql -c "CREATE TABLE test (id integer, val text);" postgres
+      psql -c "SELECT * FROM hypopg_create_index('CREATE INDEX ON test (id)');" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://hypopg.readthedocs.io/
+  license: PostgreSQL
+  summary: Hypothetical indexes for PostgreSQL
+  description: |
+    HypoPG is a PostgreSQL extension adding support for hypothetical indexes.
+    It allows you to test the impact of an index on query plans without actually
+    creating it, which is useful for index tuning and optimization.
+  repository: https://github.com/HypoPG/hypopg
