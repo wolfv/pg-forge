@@ -22,8 +22,8 @@ jobs:
           - { target: linux-aarch64, os: ubuntu-22.04-arm }
         #   - { target: win-64, os: windows-latest }
           # force older macos-13 to get x86_64 runners
-          - { target: osx-64, os: macos-15 }
-          - { target: osx-arm64, os: macos-15-arm64 }
+          - { target: osx-64, os: macos-15-intel }
+          - { target: osx-arm64, os: macos-15 }
       fail-fast: false
 
     name: ${{ matrix.target }}
