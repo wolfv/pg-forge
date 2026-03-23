@@ -1,13 +1,14 @@
 context:
-  version: "REL1_9_1"
+  version: "1.9.1"
+  tag: REL${{ version | replace(".", "_") }}
 
 package:
   name: pg_squeeze
   version: ${{ version }}
 
 source:
-  url: https://github.com/cybertec-postgresql/pg_squeeze/archive/refs/tags/REL1_7_0.tar.gz
-  sha256: f45a545a8bae99c7485c7de1f155ca50f65e87e1a86aec9d853130625d0aa725
+  url: https://github.com/cybertec-postgresql/pg_squeeze/archive/refs/tags/${{ tag }}.tar.gz
+  sha256: 2ac81fe38bca0e34a861f0437d0958ae5ebaa2aafbab529d9373fe2c02186872
 
 build:
   script: |
