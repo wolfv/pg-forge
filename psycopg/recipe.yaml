@@ -1,6 +1,6 @@
 context:
   name: psycopg
-  version: "3.2.6"
+  version: "3.3.3"
 
 recipe:
   name: psycopg-split
@@ -18,7 +18,7 @@ outputs:
 
     source:
       url: https://pypi.org/packages/source/p/psycopg-c/psycopg_c-${{ version }}.tar.gz
-      sha256: b5fd4ce70f82766a122ca5076a36c4d5818eaa9df9bf76870bc83a064ffaed3a
+      sha256: 86ef6f4424348247828e83fb0882c9f8acb33e64d0a5ce66c1b4a5107ee73edd
 
     requirements:
       build:
@@ -47,7 +47,7 @@ outputs:
 
     source:
       url: https://pypi.org/packages/source/p/psycopg/psycopg-${{ version }}.tar.gz
-      sha256: 16fa094efa2698f260f2af74f3710f781e4a6f226efe9d1fd0c37f384639ed8a
+      sha256: 5e9a47458b3c1583326513b2556a2a9473a1001a56c9efe9e587245b43148dd9
 
     build:
       script: ${{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
