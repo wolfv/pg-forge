@@ -1,5 +1,5 @@
 context:
-  version: "2.6"
+  version: "wal2json_2_6"
 
 package:
   name: wal2json
@@ -19,6 +19,7 @@ requirements:
   build:
     - make
     - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
     - lld
   host:
     - postgresql

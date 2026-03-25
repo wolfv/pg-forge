@@ -1,5 +1,5 @@
 context:
-  version: "1.3.3"
+  version: "1.3.4"
 
 package:
   name: pgtap
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/theory/pgtap/archive/refs/tags/v${{ version }}.tar.gz
-  sha256: 325ea79d0d2515bce96bce43f6823dcd3effbd6c54cb2a4d6c2384fffa3a14c7
+  sha256: d2c951afb296a001d21785611a8e966e3f8fa3f5bfbd929396a5130c0152f314
 
 build:
   script: |
@@ -21,6 +21,7 @@ requirements:
     - make
     - perl
     - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
     - lld
   host:
     - perl

@@ -1,5 +1,5 @@
 context:
-  version: "5.2.4"
+  version: "5.4.3"
 
 package:
   name: pg_partman
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/pgpartman/pg_partman/archive/refs/tags/v${{ version }}.tar.gz
-  sha256: 462464d83389ef20256b982960646a1572341c0beb09eeff32b4a69f04e31b76
+  sha256: c52e3b8cf80d306468f48fbdb1905e4c2574bf8362240af57aebbbf9e18c6fe2
 
 build:
   script: |
@@ -19,6 +19,7 @@ requirements:
   build:
     - make
     - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
     - lld
   host:
     - postgresql

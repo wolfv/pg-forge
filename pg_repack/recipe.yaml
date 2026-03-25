@@ -21,6 +21,7 @@ requirements:
     - make
     - gawk
     - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
     - lld
   host:
     - postgresql
