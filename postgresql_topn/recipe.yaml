@@ -43,7 +43,7 @@ tests:
 
 about:
   homepage: https://github.com/citusdata/postgresql-topn
-  license: AGPL-3.0
+  license: AGPL-3.0-only
   summary: Top-N values aggregation for PostgreSQL
   description: |
     postgresql-topn is a PostgreSQL extension that returns the top values in a database according
