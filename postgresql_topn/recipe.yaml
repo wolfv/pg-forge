@@ -30,11 +30,11 @@ tests:
       initdb -D $TEST_DIR
       pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
       psql -c "CREATE EXTENSION topn;" postgres
-      psql -c "CREATE TABLE page_views (url text, view_count topn);" postgres
-      psql -c "INSERT INTO page_views VALUES ('/home', topn_add(NULL, 'user1'));" postgres
-      psql -c "UPDATE page_views SET view_count = topn_add(view_count, 'user2') WHERE url = '/home';" postgres
-      psql -c "UPDATE page_views SET view_count = topn_add(view_count, 'user1') WHERE url = '/home';" postgres
-      psql -c "SELECT (topn(view_count, 10)).* FROM page_views WHERE url = '/home';" postgres
+      psql -c "CREATE TABLE events (url text, ts date);" postgres
+      psql -c "INSERT INTO events VALUES ('/home', '2025-01-01'), ('/home', '2025-01-01'), ('/about', '2025-01-01'), ('/home', '2025-01-02');" postgres
+      psql -c "CREATE TABLE popular_urls (day date UNIQUE, agg_data jsonb);" postgres
+      psql -c "INSERT INTO popular_urls SELECT ts, topn_add_agg(url) FROM events GROUP BY ts;" postgres
+      psql -c "SELECT day, (topn(agg_data, 3)).* FROM popular_urls ORDER BY day;" postgres
       pg_ctl stop -D $TEST_DIR
 
     requirements:
