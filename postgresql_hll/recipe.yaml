@@ -11,10 +11,6 @@ source:
 
 build:
   script: |
-    # Remove -fuse-ld=lld from LDFLAGS on macOS where it is unsupported
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-      export LDFLAGS="${LDFLAGS//-fuse-ld=lld/}"
-    fi
     make install pkglibdir=$PREFIX/lib \
                  datadir=$PREFIX/share \
                  -j${CPU_COUNT}
@@ -25,6 +21,7 @@ requirements:
     - ${{ compiler('c') }}
     - ${{ compiler('cxx') }}
     - ${{ stdlib('c') }}
+    - lld
   host:
     - postgresql
     - libpq
