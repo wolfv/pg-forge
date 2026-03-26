@@ -1,0 +1,54 @@
+context:
+  version: "2.7.0"
+
+package:
+  name: postgresql_topn
+  version: ${{ version }}
+
+source:
+  url: https://github.com/citusdata/postgresql-topn/archive/refs/tags/v${{ version }}.tar.gz
+  sha256: 59a56a8d5681cd89cea54e07b01ae46c13e57f1fb4dab077dc11464873073491
+
+build:
+  script: |
+    make install pkglibdir=$PREFIX/lib \
+                 datadir=$PREFIX/share \
+                 -j${CPU_COUNT}
+
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
+    - lld
+  host:
+    - postgresql
+    - libpq
+
+tests:
+  - script: |
+      export TEST_DIR=./test_topn
+      initdb -D $TEST_DIR
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+      psql -c "CREATE EXTENSION topn;" postgres
+      psql -c "CREATE TABLE events (url text, ts date);" postgres
+      psql -c "INSERT INTO events VALUES ('/home', '2025-01-01'), ('/home', '2025-01-01'), ('/about', '2025-01-01'), ('/home', '2025-01-02');" postgres
+      psql -c "CREATE TABLE popular_urls (day date UNIQUE, agg_data jsonb);" postgres
+      psql -c "INSERT INTO popular_urls SELECT ts, topn_add_agg(url) FROM events GROUP BY ts;" postgres
+      psql -c "SELECT day, (topn(agg_data, 3)).* FROM popular_urls ORDER BY day;" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://github.com/citusdata/postgresql-topn
+  license: AGPL-3.0-only
+  summary: Top-N values aggregation for PostgreSQL
+  description: |
+    postgresql-topn is a PostgreSQL extension that returns the top values in a database according
+    to some criteria. It uses an approximate algorithm to provide fast results with bounded memory usage,
+    making it suitable for real-time analytics on high-cardinality data such as tracking the most
+    popular pages, most active users, or top search queries.
+  repository: https://github.com/citusdata/postgresql-topn

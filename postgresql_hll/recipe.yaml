@@ -1,0 +1,55 @@
+context:
+  version: "2.19"
+
+package:
+  name: postgresql_hll
+  version: ${{ version }}
+
+source:
+  url: https://github.com/citusdata/postgresql-hll/archive/refs/tags/v${{ version }}.tar.gz
+  sha256: d63d56522145f2d737e0d056c9cfdfe3e8b61008c12ca4c45bde7d9b942f9c46
+
+build:
+  script: |
+    make install pkglibdir=$PREFIX/lib \
+                 datadir=$PREFIX/share \
+                 -j${CPU_COUNT}
+
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+    - ${{ compiler('cxx') }}
+    - ${{ stdlib('c') }}
+    - lld
+  host:
+    - postgresql
+    - libpq
+
+tests:
+  - script: |
+      export TEST_DIR=./test_hll
+      initdb -D $TEST_DIR
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+      psql -c "CREATE EXTENSION hll;" postgres
+      psql -c "CREATE TABLE daily_uniques (date date UNIQUE, users hll);" postgres
+      psql -c "INSERT INTO daily_uniques VALUES ('2025-01-01', hll_empty());" postgres
+      psql -c "UPDATE daily_uniques SET users = hll_add(users, hll_hash_integer(42)) WHERE date = '2025-01-01';" postgres
+      psql -c "UPDATE daily_uniques SET users = hll_add(users, hll_hash_integer(123)) WHERE date = '2025-01-01';" postgres
+      psql -c "SELECT date, hll_cardinality(users) FROM daily_uniques;" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://github.com/citusdata/postgresql-hll
+  license: Apache-2.0
+  summary: HyperLogLog data structures as a native data type for PostgreSQL
+  description: |
+    postgresql-hll is a PostgreSQL extension adding HyperLogLog data structures as a native data type.
+    HyperLogLog is a fixed-size, set-like structure used for distinct value counting with tunable precision.
+    It is ideal for analytics workloads that need approximate unique counts over very large datasets
+    without storing the individual values.
+  repository: https://github.com/citusdata/postgresql-hll
