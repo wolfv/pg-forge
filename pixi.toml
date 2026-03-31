@@ -10,7 +10,7 @@ platforms = ["osx-arm64", "linux-64", "win-64", "osx-64", "linux-aarch64"]
 bump = "bash bump_recipes.sh"
 
 [dependencies]
-rattler-build = ">=0.60.0,<0.61"
+rattler-build = ">=0.61.3,<0.62"
 
 [feature.lint.dependencies]
 prettier = "*"
