@@ -11,9 +11,8 @@ source:
 
 build:
   skip:
-    - match(postgresql, "14")
-    - match(postgresql, "15")
-    - match(postgresql, "16")
+    - not match(postgresql, "18.*")
+
   script: |
     make install USE_PGXS=1 \
          pkglibdir=$PREFIX/lib \

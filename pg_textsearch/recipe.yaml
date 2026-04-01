@@ -1,0 +1,57 @@
+context:
+  version: "1.0.0"
+
+package:
+  name: pg_textsearch
+  version: ${{ version }}
+
+source:
+  url: https://github.com/timescale/pg_textsearch/releases/download/v${{ version }}/pg_textsearch-${{ version }}.tar.gz
+  sha256: 134d885b81488acd433c44bfce806d9ec94d918bf487185b7fe9e0fb98b9dfa7
+
+build:
+  skip:
+    - match(postgresql, "<=16")
+  script: |
+    make install pkglibdir=$PREFIX/lib \
+                 datadir=$PREFIX/share \
+                 -j${CPU_COUNT}
+
+requirements:
+  build:
+    - make
+    - ${{ compiler('c') }}
+    - ${{ stdlib('c') }}
+    - lld
+  host:
+    - postgresql
+    - libpq
+
+tests:
+  - script: |
+      export TEST_DIR=./test_pg_textsearch
+      initdb -D $TEST_DIR
+      echo "shared_preload_libraries = 'pg_textsearch'" >> $TEST_DIR/postgresql.conf
+      pg_ctl -D $TEST_DIR -l logfile start || cat ./logfile
+      psql -c "CREATE EXTENSION pg_textsearch;" postgres
+      psql -c "CREATE TABLE docs (id bigserial PRIMARY KEY, content text);" postgres
+      psql -c "INSERT INTO docs (content) VALUES ('PostgreSQL full text search'), ('BM25 ranking algorithm');" postgres
+      psql -c "CREATE INDEX docs_idx ON docs USING bm25(content) WITH (text_config='english');" postgres
+      psql -c "SELECT * FROM docs ORDER BY content <@> 'search' LIMIT 5;" postgres
+      pg_ctl stop -D $TEST_DIR
+
+    requirements:
+      run:
+        - postgresql
+
+about:
+  homepage: https://github.com/timescale/pg_textsearch
+  license: PostgreSQL
+  summary: PostgreSQL extension for BM25 relevance-ranked full-text search
+  description: |
+    pg_textsearch is a PostgreSQL extension implementing BM25 relevance-ranked
+    full-text search. It provides a custom BM25 index access method (`USING bm25`),
+    a scoring operator (<@>), Block-Max WAND optimization for fast top-k queries,
+    parallel index builds, and support for all PostgreSQL text search configurations.
+    Requires shared_preload_libraries = 'pg_textsearch' in postgresql.conf.
+  repository: https://github.com/timescale/pg_textsearch
